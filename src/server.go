@@ -29,6 +29,7 @@ func (w *loggingResponseWriter) Write(data []byte) (int, error) {
 }
 
 func helloHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(201)	// for example purposes
 	fmt.Fprintln(w, "<html><head><link rel='stylesheet' type='text/css' href='/style/style.css' /></head>")
 	fmt.Fprintln(w, "<body>")
     fmt.Fprintf(w, "<h1>Hello %s!</h1>", r.URL.Path[1:])
@@ -88,7 +89,7 @@ func shutdownHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-    http.Handle("/user/{id}/", &loggingHandler{http.HandlerFunc(userHandler)})
+    http.Handle("/user/", &loggingHandler{http.HandlerFunc(userHandler)})
     http.Handle("/hello", &loggingHandler{http.HandlerFunc(helloHandler)})
 	http.Handle("/shutdown", &loggingHandler{http.HandlerFunc(shutdownHandler)})
 	http.Handle("/style/", http.StripPrefix("/style", http.FileServer(http.Dir("style"))))	// don't log access to stylesheets
