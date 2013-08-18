@@ -8,10 +8,10 @@
 	<body>
 		<h1 class="path">Contents of &quot;{{ .Path }}&quot;</h1>
 		<hr />
-		<div class="file list">
-			{{range .Files}}
-			<div class="file">
-				<a href="{{.}}">{{.}}</a>
+		<div class="file-list">
+			{{range $filename, $type := .Files}}
+			<div class="{{$type}}">
+				<a href="{{$filename}}">{{$filename}}</a>
 			</div>
 			{{end}}
 		</div>

@@ -106,18 +106,20 @@ func (fs FolderServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			if !strings.HasSuffix(r.URL.Path, "/") {
 				http.Redirect(w, r, r.URL.Path + "/", 302)
 			} else {
+			// for some reason go automatically redirects '.../index.html' to '.../',
+			// so I have to look for it here and serve it if found
 				if _, err := os.Stat(path + "/index.html"); err==nil {
 					fmt.Println("index.html found")
 					http.ServeFile(w, r, path + "/index.html");
 				} else {
 					files, _ := ioutil.ReadDir(path)
-					filenames := make([]string, 0, len(files))
+					filenames := make(map[string]string)
 					for _, file := range files {
 						if !strings.HasPrefix(file.Name(), ".") {
 							if file.Mode().IsDir() {
-								filenames = append(filenames, file.Name() + "/")		
+								filenames[file.Name() + "/"] = "folder"		
 							} else {
-								filenames = append(filenames, file.Name())
+								filenames[file.Name()] = "file"
 							}
 						}
 					}
