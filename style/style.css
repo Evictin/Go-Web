@@ -2,3 +2,13 @@
 h1 {
 	color:red;
 }
+
+.path {
+	color:black;
+	margin-left:1em;
+}
+
+.file {
+	margin-left:1em;
+	font-family: Helvetica, sans-serif;
+}

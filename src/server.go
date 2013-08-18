@@ -8,6 +8,8 @@ import (
     "encoding/base64"
     "time"
     "os"
+    "io/ioutil"
+    "html/template"
 )
 
 type loggingHandler struct { http.Handler }
@@ -88,12 +90,53 @@ func shutdownHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+type FolderServer struct { }
+
+func (fs FolderServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	t, _ := template.ParseFiles("tmpl/folder.html")
+	path := strings.TrimPrefix(r.URL.Path, "/test/")
+	if len(path) == 0 {
+		path = "."
+	}
+	fileInfo, err := os.Stat(path)
+	if err != nil {
+		http.NotFound(w, r)
+	} else {
+		if fileInfo.Mode().IsDir() {
+			if !strings.HasSuffix(r.URL.Path, "/") {
+				http.Redirect(w, r, r.URL.Path + "/", 302)
+			} else {
+				if _, err := os.Stat(path + "/index.html"); err==nil {
+					fmt.Println("index.html found")
+					http.ServeFile(w, r, path + "/index.html");
+				} else {
+					files, _ := ioutil.ReadDir(path)
+					filenames := make([]string, 0, len(files))
+					for _, file := range files {
+						if !strings.HasPrefix(file.Name(), ".") {
+							if file.Mode().IsDir() {
+								filenames = append(filenames, file.Name() + "/")		
+							} else {
+								filenames = append(filenames, file.Name())
+							}
+						}
+					}
+					t.Execute(w, map[string]interface{}{"Path":r.URL.Path, "Files":filenames})
+				}
+			}
+		} else {
+			http.ServeFile(w, r, path)
+		}
+	}
+}
+
 func main() {
     http.Handle("/user/", &loggingHandler{http.HandlerFunc(userHandler)})
     http.Handle("/hello", &loggingHandler{http.HandlerFunc(helloHandler)})
 	http.Handle("/shutdown", &loggingHandler{http.HandlerFunc(shutdownHandler)})
 	http.Handle("/style/", http.StripPrefix("/style", http.FileServer(http.Dir("style"))))	// don't log access to stylesheets
     http.Handle("/", &loggingHandler{http.FileServer(http.Dir("public"))})
+    http.Handle("/test/", &loggingHandler{&FolderServer{}})
     http.ListenAndServe(":8080", nil)
 }
 

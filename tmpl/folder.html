@@ -1,0 +1,19 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Strict//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+		<title>{{ .Path }}</title>
+		<link rel="stylesheet" type="text/css" href="/style/style.css" />
+	</head>
+	<body>
+		<h1 class="path">Contents of &quot;{{ .Path }}&quot;</h1>
+		<hr />
+		<div class="file list">
+			{{range .Files}}
+			<div class="file">
+				<a href="{{.}}">{{.}}</a>
+			</div>
+			{{end}}
+		</div>
+	</body>
+</html>
